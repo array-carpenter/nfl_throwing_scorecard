@@ -108,12 +108,6 @@ nfl_logo_dict = {team['team']: team['logo_url'] for team in nfl_teams}
 def get_team_logo(team_abb: str):
     team_abb = team_abb.strip().upper()  # Ensure the abbreviation is in uppercase and has no extra spaces
     
-    # Debug: Print the team abbreviation to verify it's correct
-    print(f"Requested team abbreviation: {team_abb}")
-    
-    # Print all available teams in the nfl_logo_dict for debugging
-    print(f"Available teams in nfl_logo_dict: {list(nfl_logo_dict.keys())}")
-    
     logo_url = nfl_logo_dict.get(team_abb, None)  # Get the logo URL based on the team abbreviation
     if logo_url:
         response = requests.get(logo_url)
