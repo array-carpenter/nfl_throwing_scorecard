@@ -49,7 +49,7 @@ game_date_str = '2024-09-15'  # Adjust as necessary for the game being summarize
 game_date = datetime.strptime(game_date_str, '%Y-%m-%d')
 
 # Retrieve player info based on player name
-player_name = 'Jalen Hurts'  # Make sure this matches the format in the CSV
+player_name = 'Kirk Cousins'  # Make sure this matches the format in the CSV
 player_info = qb_info[qb_info['Name'] == player_name].iloc[0]
 
 # Calculate the player's age based on their birthday and the game date
@@ -60,12 +60,59 @@ player_age = (game_date - player_birthday).days // 365  # Calculate age in years
 player_id = player_info['player_id']
 headshot = get_espn_headshot(player_id)
 
+# NFL team logo URLs
+nfl_teams = [
+    {"team": "ARI", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/ari.png&h=500&w=500"},
+    {"team": "ATL", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/atl.png&h=500&w=500"},
+    {"team": "BAL", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/bal.png&h=500&w=500"},
+    {"team": "BUF", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/buf.png&h=500&w=500"},
+    {"team": "CAR", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/car.png&h=500&w=500"},
+    {"team": "CHI", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/chi.png&h=500&w=500"},
+    {"team": "CIN", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/cin.png&h=500&w=500"},
+    {"team": "CLE", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/cle.png&h=500&w=500"},
+    {"team": "DAL", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/dal.png&h=500&w=500"},
+    {"team": "DEN", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/den.png&h=500&w=500"},
+    {"team": "DET", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/det.png&h=500&w=500"},
+    {"team": "GB", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/gb.png&h=500&w=500"},
+    {"team": "HOU", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/hou.png&h=500&w=500"},
+    {"team": "IND", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/ind.png&h=500&w=500"},
+    {"team": "JAX", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/jax.png&h=500&w=500"},
+    {"team": "KC", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/kc.png&h=500&w=500"},
+    {"team": "LAC", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/lac.png&h=500&w=500"},
+    {"team": "LAR", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/lar.png&h=500&w=500"},
+    {"team": "MIA", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/mia.png&h=500&w=500"},
+    {"team": "MIN", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/min.png&h=500&w=500"},
+    {"team": "NE", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/ne.png&h=500&w=500"},
+    {"team": "NO", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/no.png&h=500&w=500"},
+    {"team": "NYG", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/nyg.png&h=500&w=500"},
+    {"team": "NYJ", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/nyj.png&h=500&w=500"},
+    {"team": "LV", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/lv.png&h=500&w=500"},
+    {"team": "PHI", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/phi.png&h=500&w=500"},
+    {"team": "PIT", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/pit.png&h=500&w=500"},
+    {"team": "SF", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/sf.png&h=500&w=500"},
+    {"team": "SEA", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/sea.png&h=500&w=500"},
+    {"team": "TB", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/tb.png&h=500&w=500"},
+    {"team": "TEN", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/ten.png&h=500&w=500"},
+    {"team": "WAS", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/was.png&h=500&w=500"},
+]
+
+# Convert the NFL teams list into a dictionary
+nfl_logo_dict = {team['team']: team['logo_url'] for team in nfl_teams}
+
+def get_team_logo(team_abb: str):
+    logo_url = nfl_logo_dict.get(team_abb, None)
+    if logo_url:
+        response = requests.get(logo_url)
+        if response.status_code == 200:
+            return Image.open(BytesIO(response.content))
+    return None
+
 # Manual filters start here
-filtered_df = data[(data['home_team'] == 'PHI') | (data['away_team'] == 'PHI')] ### change team RAMS are LA Chargers are LAC
+filtered_df = data[(data['home_team'] == 'ATL') | (data['away_team'] == 'ATL')] ### change team RAMS are LA Chargers are LAC
 
 # Separate filters for passing and rushing plays
-passing_plays = filtered_df[filtered_df['passer_player_name'] == 'J.Hurts'] ### change qb
-rushing_plays = filtered_df[filtered_df['rusher_player_name'] == 'J.Hurts'] ### change qb
+passing_plays = filtered_df[filtered_df['passer_player_name'] == 'K.Cousins'] ### change qb
+rushing_plays = filtered_df[filtered_df['rusher_player_name'] == 'K.Cousins'] ### change qb
 
 # Filter game data by game id
 game_data_passing = passing_plays[passing_plays['game_id'] == '2024_02_ATL_PHI'] ### follow format YEAR_WEEK_AWAY_HOME 2023_12_BUF_PHI
@@ -209,10 +256,7 @@ summary_table = {
 # Create the updated summary DataFrame
 summary_df = pd.DataFrame.from_dict(summary_table)
 
-logo_path = '/Users/raymondcarpenter/Documents/GitHub/nfl_throwing_scorecard/eagles_logo.png' # manually find logo path
-logo = Image.open(logo_path)
-
-def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, logo: Image, summary_df: pd.DataFrame, pass_distance_summary: pd.DataFrame, quarter_positions, save_path: str = None):
+def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, team_abb: str, summary_df: pd.DataFrame, pass_distance_summary: pd.DataFrame, quarter_positions, save_path: str = None):
     # Create a more compact figure
     fig = plt.figure(figsize=(18, 14))  
 
@@ -247,8 +291,12 @@ def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, logo: Image, 
     # Use the player_headshot function to display the headshot
     player_headshot(player_id, ax_headshot)
 
-    # Plot logo as before
-    ax_logo.imshow(logo)    
+    # Fetch and display the NFL team logo using the abbreviation
+    team_logo = get_team_logo(team_abb)
+    if team_logo:
+        ax_logo.imshow(team_logo)
+    else:
+        ax_logo.text(0.5, 0.5, 'No Logo', ha='center', va='center', fontsize=12)
     ax_logo.axis('off')
 
     # Extract relevant data
@@ -258,7 +306,7 @@ def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, logo: Image, 
     # Adjust biographical information display
     ax_bio.text(0.5, 0.95, player_name, fontsize=22, ha='center', fontweight='bold')  # Dynamically display QB name
     ax_bio.text(0.5, 0.50, f'{player_info["dexterity"]}HQB, Age: {player_age}, {player_height}/{player_weight} lbs', fontsize=18, ha='center')  # Dynamically display height and weight
-    ax_bio.text(0.5, 0.1, f'2024 Week 2 Throwing Summary vs. Atlanta', fontsize=18, ha='center', fontstyle='italic')  # Still manually set game information
+    ax_bio.text(0.5, 0.1, f'2024 Week 2 Throwing Summary @ Philadelphia', fontsize=18, ha='center', fontstyle='italic')  # Still manually set game information
     ax_bio.axis('off')
 
     # Summary Table Plot - Adjusted for more compact cells
@@ -343,6 +391,6 @@ def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, logo: Image, 
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
 
-save_path = 'C:/Users/RaymondCarpenter/Documents/GitHub/nfl_throwing_scorecard/qb_dashboard.png'
+save_path = 'qb_dashboard.png'
 
-qb_dashboard(game_data_passing, headshot, logo, summary_df, pass_distance_summary, quarter_positions, save_path=save_path)
+qb_dashboard(game_data_passing, headshot, 'ATL', summary_df, pass_distance_summary, quarter_positions, save_path=save_path)
