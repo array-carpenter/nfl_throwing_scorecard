@@ -44,13 +44,18 @@ def player_headshot(player_id: str, ax: plt.Axes):
 # Load the quarterback information (including player_id and birthday) from qb_info.csv
 qb_info = pd.read_csv('C:/Users/RaymondCarpenter/Documents/GitHub/nfl_throwing_scorecard/qb_info.csv')
 
+# Accept player_name input from the user
+player_name = input("Enter the player's name: ")
+
+# Retrieve player info based on player name
+player_info = qb_info[qb_info['Name'] == player_name].iloc[0]
+
+# Get the formatted player name from the CSV
+formatted_player_name = player_info['data_formatted_player_name']
+
 # Assuming the game date is stored in a specific format (e.g., 'YYYY-MM-DD')
 game_date_str = '2024-09-15'  # Adjust as necessary for the game being summarized
 game_date = datetime.strptime(game_date_str, '%Y-%m-%d')
-
-# Retrieve player info based on player name
-player_name = 'Kirk Cousins'  # Make sure this matches the format in the CSV
-player_info = qb_info[qb_info['Name'] == player_name].iloc[0]
 
 # Calculate the player's age based on their birthday and the game date
 player_birthday = pd.to_datetime(player_info['Birthday'], format='%m/%d/%Y')
@@ -99,20 +104,31 @@ nfl_teams = [
 # Convert the NFL teams list into a dictionary
 nfl_logo_dict = {team['team']: team['logo_url'] for team in nfl_teams}
 
+# Function to get the team logo based on the team abbreviation from qb_info
 def get_team_logo(team_abb: str):
-    logo_url = nfl_logo_dict.get(team_abb, None)
+    team_abb = team_abb.strip().upper()  # Ensure the abbreviation is in uppercase and has no extra spaces
+    
+    # Debug: Print the team abbreviation to verify it's correct
+    print(f"Requested team abbreviation: {team_abb}")
+    
+    # Print all available teams in the nfl_logo_dict for debugging
+    print(f"Available teams in nfl_logo_dict: {list(nfl_logo_dict.keys())}")
+    
+    logo_url = nfl_logo_dict.get(team_abb, None)  # Get the logo URL based on the team abbreviation
     if logo_url:
         response = requests.get(logo_url)
         if response.status_code == 200:
             return Image.open(BytesIO(response.content))
+    print(f"Could not retrieve logo for team {team_abb}")
     return None
 
+
 # Manual filters start here
-filtered_df = data[(data['home_team'] == 'ATL') | (data['away_team'] == 'ATL')] ### change team RAMS are LA Chargers are LAC
+filtered_df = data[(data['home_team'] == player_info['Team']) | (data['away_team'] == player_info['Team'])] ### change team RAMS are LA Chargers are LAC
 
 # Separate filters for passing and rushing plays
-passing_plays = filtered_df[filtered_df['passer_player_name'] == 'K.Cousins'] ### change qb
-rushing_plays = filtered_df[filtered_df['rusher_player_name'] == 'K.Cousins'] ### change qb
+passing_plays = filtered_df[filtered_df['passer_player_name'] == formatted_player_name] 
+rushing_plays = filtered_df[filtered_df['rusher_player_name'] == formatted_player_name]
 
 # Filter game data by game id
 game_data_passing = passing_plays[passing_plays['game_id'] == '2024_02_ATL_PHI'] ### follow format YEAR_WEEK_AWAY_HOME 2023_12_BUF_PHI
@@ -306,7 +322,7 @@ def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, team_abb: str
     # Adjust biographical information display
     ax_bio.text(0.5, 0.95, player_name, fontsize=22, ha='center', fontweight='bold')  # Dynamically display QB name
     ax_bio.text(0.5, 0.50, f'{player_info["dexterity"]}HQB, Age: {player_age}, {player_height}/{player_weight} lbs', fontsize=18, ha='center')  # Dynamically display height and weight
-    ax_bio.text(0.5, 0.1, f'2024 Week 2 Throwing Summary @ Philadelphia', fontsize=18, ha='center', fontstyle='italic')  # Still manually set game information
+    ax_bio.text(0.5, 0.1, f'2024 Week 2 Throwing Summary vs. Atlanta', fontsize=18, ha='center', fontstyle='italic')  # Still manually set game information
     ax_bio.axis('off')
 
     # Summary Table Plot - Adjusted for more compact cells
@@ -393,4 +409,4 @@ def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, team_abb: str
 
 save_path = 'qb_dashboard.png'
 
-qb_dashboard(game_data_passing, headshot, 'ATL', summary_df, pass_distance_summary, quarter_positions, save_path=save_path)
+qb_dashboard(game_data_passing, headshot, 'PHI', summary_df, pass_distance_summary, quarter_positions, save_path=save_path)
