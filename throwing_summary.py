@@ -6,6 +6,7 @@ import matplotlib.gridspec as gridspec
 import requests
 from io import BytesIO
 from PIL import Image
+from datetime import datetime
 
 # Define the year and load the data
 YEAR = 2024
@@ -15,7 +16,6 @@ data = pd.read_csv(url, compression='gzip', low_memory=False)
 # Set options for displaying dataframes
 pd.set_option('display.max_rows', 100)
 pd.set_option('display.max_columns', 400)
-
 
 # Function to get an image from ESPN based on player_id
 def get_espn_headshot(player_id: str):
@@ -41,23 +41,31 @@ def player_headshot(player_id: str, ax: plt.Axes):
         ax.text(0.5, 0.5, 'No Image', ha='center', va='center', fontsize=12)
         ax.axis('off')
 
-# Load the quarterback information (including player_id) from qb_info.csv
+# Load the quarterback information (including player_id and birthday) from qb_info.csv
 qb_info = pd.read_csv('C:/Users/RaymondCarpenter/Documents/GitHub/nfl_throwing_scorecard/qb_info.csv')
 
+# Assuming the game date is stored in a specific format (e.g., 'YYYY-MM-DD')
+game_date_str = '2024-09-15'  # Adjust as necessary for the game being summarized
+game_date = datetime.strptime(game_date_str, '%Y-%m-%d')
+
 # Retrieve player info based on player name
-player_name = 'Kirk Cousins'  # Make sure this matches the format in the CSV
+player_name = 'Jalen Hurts'  # Make sure this matches the format in the CSV
 player_info = qb_info[qb_info['Name'] == player_name].iloc[0]
+
+# Calculate the player's age based on their birthday and the game date
+player_birthday = pd.to_datetime(player_info['Birthday'], format='%m/%d/%Y')
+player_age = (game_date - player_birthday).days // 365  # Calculate age in years
 
 # Get the player ID from the CSV and use it to fetch the headshot
 player_id = player_info['player_id']
 headshot = get_espn_headshot(player_id)
 
 # Manual filters start here
-filtered_df = data[(data['home_team'] == 'ATL') | (data['away_team'] == 'ATL')] ### change team RAMS are LA Chargers are LAC
+filtered_df = data[(data['home_team'] == 'PHI') | (data['away_team'] == 'PHI')] ### change team RAMS are LA Chargers are LAC
 
 # Separate filters for passing and rushing plays
-passing_plays = filtered_df[filtered_df['passer_player_name'] == 'K.Cousins'] ### change qb
-rushing_plays = filtered_df[filtered_df['rusher_player_name'] == 'K.Cousins'] ### change qb
+passing_plays = filtered_df[filtered_df['passer_player_name'] == 'J.Hurts'] ### change qb
+rushing_plays = filtered_df[filtered_df['rusher_player_name'] == 'J.Hurts'] ### change qb
 
 # Filter game data by game id
 game_data_passing = passing_plays[passing_plays['game_id'] == '2024_02_ATL_PHI'] ### follow format YEAR_WEEK_AWAY_HOME 2023_12_BUF_PHI
@@ -136,7 +144,6 @@ for end_time in quarter_end_times:
 if overtime or (len(quarter_positions) > 0 and quarter_positions[-1] == 0):
     quarter_positions = quarter_positions[:-1]
 
-
 # Create bins for pass distances
 bins = [-np.inf, 1, 10, 25, np.inf]
 labels = ['Screen', 'Short', 'Medium', 'Deep']
@@ -202,14 +209,7 @@ summary_table = {
 # Create the updated summary DataFrame
 summary_df = pd.DataFrame.from_dict(summary_table)
 
-player_name = 'Kirk Cousins' 
-player_info = qb_info[qb_info['Name'] == player_name].iloc[0]
-
-# Get the player ID from the CSV and fetch the headshot
-player_id = player_info['player_id']
-headshot = get_espn_headshot(player_id)
-
-logo_path = '/Users/raymondcarpenter/Documents/GitHub/nfl_throwing_scorecard/falcons_logo.png' # manually find logo path
+logo_path = '/Users/raymondcarpenter/Documents/GitHub/nfl_throwing_scorecard/eagles_logo.png' # manually find logo path
 logo = Image.open(logo_path)
 
 def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, logo: Image, summary_df: pd.DataFrame, pass_distance_summary: pd.DataFrame, quarter_positions, save_path: str = None):
@@ -244,26 +244,22 @@ def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, logo: Image, 
     ax_left.axis('off')
     ax_right.axis('off')
 
-# Use the player_headshot function to display the headshot
+    # Use the player_headshot function to display the headshot
     player_headshot(player_id, ax_headshot)
 
-# Plot logo as before
+    # Plot logo as before
     ax_logo.imshow(logo)    
     ax_logo.axis('off')
 
-# Retrieve player info based on player name
-    player_info = qb_info[qb_info['Name'] == player_name].iloc[0]
-
-# Extract relevant data
+    # Extract relevant data
     player_height = player_info['Height']  # Assuming 'Height' is stored in feet and inches as '6\'3"'      
     player_weight = player_info['Weight']  # Assuming weight is stored as an integer value
 
-# Adjust biographical information display
+    # Adjust biographical information display
     ax_bio.text(0.5, 0.95, player_name, fontsize=22, ha='center', fontweight='bold')  # Dynamically display QB name
-    ax_bio.text(0.5, 0.50, f'{player_info["dexterity"]}HQB, Age: {player_info["Age"]}, {player_height}/{player_weight} lbs', fontsize=18, ha='center')  # Dynamically display height and weight
-    ax_bio.text(0.5, 0.1, f'2024 Week 2 Throwing Summary @ Philadelphia', fontsize=18, ha='center', fontstyle='italic')  # Still manually set game information
+    ax_bio.text(0.5, 0.50, f'{player_info["dexterity"]}HQB, Age: {player_age}, {player_height}/{player_weight} lbs', fontsize=18, ha='center')  # Dynamically display height and weight
+    ax_bio.text(0.5, 0.1, f'2024 Week 2 Throwing Summary vs. Atlanta', fontsize=18, ha='center', fontstyle='italic')  # Still manually set game information
     ax_bio.axis('off')
-
 
     # Summary Table Plot - Adjusted for more compact cells
     ax_summary_table.axis('off')
@@ -347,10 +343,6 @@ def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, logo: Image, 
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
 
-    # Show the figure
-    #plt.show()
-
-save_path = '/Users/raymondcarpenter/Documents/GitHub/14thstreetanalytics/throwing_summary/qb_dashboard.png'
+save_path = 'C:/Users/RaymondCarpenter/Documents/GitHub/nfl_throwing_scorecard/qb_dashboard.png'
 
 qb_dashboard(game_data_passing, headshot, logo, summary_df, pass_distance_summary, quarter_positions, save_path=save_path)
-
