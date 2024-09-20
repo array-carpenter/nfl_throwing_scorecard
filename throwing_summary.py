@@ -54,7 +54,7 @@ player_info = qb_info[qb_info['Name'] == player_name].iloc[0]
 formatted_player_name = player_info['data_formatted_player_name']
 
 # Assuming the game date is stored in a specific format (e.g., 'YYYY-MM-DD')
-game_date_str = '2024-09-15'  # Adjust as necessary for the game being summarized
+game_date_str = '2024-09-19'  # Adjust as necessary for the game being summarized
 game_date = datetime.strptime(game_date_str, '%Y-%m-%d')
 
 # Calculate the player's age based on their birthday and the game date
@@ -104,18 +104,22 @@ nfl_teams = [
 # Convert the NFL teams list into a dictionary
 nfl_logo_dict = {team['team']: team['logo_url'] for team in nfl_teams}
 
-# Function to get the team logo based on the team abbreviation from qb_info
 def get_team_logo(team_abb: str):
-    team_abb = team_abb.strip().upper()  # Ensure the abbreviation is in uppercase and has no extra spaces
+    team_abb = team_abb.strip().upper()  # Ensure abbreviation is formatted correctly
+    logo_url = nfl_logo_dict.get(team_abb, None)  # Get the logo URL based on abbreviation
     
-    logo_url = nfl_logo_dict.get(team_abb, None)  # Get the logo URL based on the team abbreviation
+    print(f"Fetching logo for team {team_abb}: {logo_url}")  # Debug print
+    
     if logo_url:
         response = requests.get(logo_url)
         if response.status_code == 200:
             return Image.open(BytesIO(response.content))
-    print(f"Could not retrieve logo for team {team_abb}")
+        else:
+            print(f"Failed to retrieve logo for {team_abb}")
+    else:
+        print(f"No logo URL found for {team_abb}")
+    
     return None
-
 
 # Manual filters start here
 filtered_df = data[(data['home_team'] == player_info['Team']) | (data['away_team'] == player_info['Team'])] ### change team RAMS are LA Chargers are LAC
@@ -125,8 +129,8 @@ passing_plays = filtered_df[filtered_df['passer_player_name'] == formatted_playe
 rushing_plays = filtered_df[filtered_df['rusher_player_name'] == formatted_player_name]
 
 # Filter game data by game id
-game_data_passing = passing_plays[passing_plays['game_id'] == '2024_02_ATL_PHI'] ### follow format YEAR_WEEK_AWAY_HOME 2023_12_BUF_PHI
-game_data_rushing = rushing_plays[rushing_plays['game_id'] == '2024_02_ATL_PHI']
+game_data_passing = passing_plays[passing_plays['game_id'] == '2024_03_NE_NYJ'] ### follow format YEAR_WEEK_AWAY_HOME 2023_12_BUF_PHI
+game_data_rushing = rushing_plays[rushing_plays['game_id'] == '2024_03_NE_NYJ']
 
 # Calculate cumulative completions and attempts for passing plays
 game_data_passing['cumulative_completions'] = game_data_passing['complete_pass'].cumsum()
@@ -301,14 +305,14 @@ def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, team_abb: str
     # Use the player_headshot function to display the headshot
     player_headshot(player_id, ax_headshot)
 
-    # Fetch and display the NFL team logo using the abbreviation
     team_logo = get_team_logo(team_abb)
+    ax_logo.clear()  # Clear any previous content on the axis
+
     if team_logo:
         ax_logo.imshow(team_logo)
+        ax_logo.axis('off')  # Ensure no axis lines
     else:
         ax_logo.text(0.5, 0.5, 'No Logo', ha='center', va='center', fontsize=12)
-    ax_logo.axis('off')
-
     # Extract relevant data
     player_height = player_info['Height']  # Assuming 'Height' is stored in feet and inches as '6\'3"'      
     player_weight = player_info['Weight']  # Assuming weight is stored as an integer value
@@ -316,7 +320,7 @@ def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, team_abb: str
     # Adjust biographical information display
     ax_bio.text(0.5, 0.95, player_name, fontsize=22, ha='center', fontweight='bold')  # Dynamically display QB name
     ax_bio.text(0.5, 0.50, f'{player_info["dexterity"]}HQB, Age: {player_age}, {player_height}/{player_weight} lbs', fontsize=18, ha='center')  # Dynamically display height and weight
-    ax_bio.text(0.5, 0.1, f'2024 Week 2 Throwing Summary vs. Atlanta', fontsize=18, ha='center', fontstyle='italic')  # Still manually set game information
+    ax_bio.text(0.5, 0.1, f'2024 Week 3 Throwing Summary @ NY Jets', fontsize=18, ha='center', fontstyle='italic')  # Still manually set game information
     ax_bio.axis('off')
 
     # Summary Table Plot - Adjusted for more compact cells
@@ -403,4 +407,4 @@ def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, team_abb: str
 
 save_path = 'qb_dashboard.png'
 
-qb_dashboard(game_data_passing, headshot, 'PHI', summary_df, pass_distance_summary, quarter_positions, save_path=save_path)
+qb_dashboard(game_data_passing, headshot, "NE", summary_df, pass_distance_summary, quarter_positions, save_path=save_path)
