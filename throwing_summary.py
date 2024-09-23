@@ -54,7 +54,7 @@ player_info = qb_info[qb_info['Name'] == player_name].iloc[0]
 formatted_player_name = player_info['data_formatted_player_name']
 
 # Assuming the game date is stored in a specific format (e.g., 'YYYY-MM-DD')
-game_date_str = '2024-09-19'  # Adjust as necessary for the game being summarized
+game_date_str = '2024-09-22'  # Adjust as necessary for the game being summarized
 game_date = datetime.strptime(game_date_str, '%Y-%m-%d')
 
 # Calculate the player's age based on their birthday and the game date
@@ -84,7 +84,7 @@ nfl_teams = [
     {"team": "JAX", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/jax.png&h=500&w=500"},
     {"team": "KC", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/kc.png&h=500&w=500"},
     {"team": "LAC", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/lac.png&h=500&w=500"},
-    {"team": "LAR", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/lar.png&h=500&w=500"},
+    {"team": "LA", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/lar.png&h=500&w=500"},
     {"team": "MIA", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/mia.png&h=500&w=500"},
     {"team": "MIN", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/min.png&h=500&w=500"},
     {"team": "NE", "logo_url": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/ne.png&h=500&w=500"},
@@ -129,8 +129,8 @@ passing_plays = filtered_df[filtered_df['passer_player_name'] == formatted_playe
 rushing_plays = filtered_df[filtered_df['rusher_player_name'] == formatted_player_name]
 
 # Filter game data by game id
-game_data_passing = passing_plays[passing_plays['game_id'] == '2024_03_NE_NYJ'] ### follow format YEAR_WEEK_AWAY_HOME 2023_12_BUF_PHI
-game_data_rushing = rushing_plays[rushing_plays['game_id'] == '2024_03_NE_NYJ']
+game_data_passing = passing_plays[passing_plays['game_id'] == '2024_03_SF_LA'] ### follow format YEAR_WEEK_AWAY_HOME 2023_12_BUF_PHI
+game_data_rushing = rushing_plays[rushing_plays['game_id'] == '2024_03_SF_LA']
 
 # Calculate cumulative completions and attempts for passing plays
 game_data_passing['cumulative_completions'] = game_data_passing['complete_pass'].cumsum()
@@ -314,16 +314,16 @@ def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, team_abb: str
     else:
         ax_logo.text(0.5, 0.5, 'No Logo', ha='center', va='center', fontsize=12)
     # Extract relevant data
-    player_height = player_info['Height']  # Assuming 'Height' is stored in feet and inches as '6\'3"'      
-    player_weight = player_info['Weight']  # Assuming weight is stored as an integer value
+    player_height = player_info['Height']       
+    player_weight = player_info['Weight'] 
 
     # Adjust biographical information display
     ax_bio.text(0.5, 0.95, player_name, fontsize=22, ha='center', fontweight='bold')  # Dynamically display QB name
     ax_bio.text(0.5, 0.50, f'{player_info["dexterity"]}HQB, Age: {player_age}, {player_height}/{player_weight} lbs', fontsize=18, ha='center')  # Dynamically display height and weight
-    ax_bio.text(0.5, 0.1, f'2024 Week 3 Throwing Summary @ NY Jets', fontsize=18, ha='center', fontstyle='italic')  # Still manually set game information
+    ax_bio.text(0.5, 0.1, f'2024 Week 3 Throwing Summary vs. San Francisco', fontsize=18, ha='center', fontstyle='italic')  # Still manually set game information
     ax_bio.axis('off')
 
-    # Summary Table Plot - Adjusted for more compact cells
+  
     ax_summary_table.axis('off')
     table = ax_summary_table.table(cellText=summary_df.values,
                                    colLabels=summary_df.columns,
@@ -407,4 +407,4 @@ def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, team_abb: str
 
 save_path = 'qb_dashboard.png'
 
-qb_dashboard(game_data_passing, headshot, "NE", summary_df, pass_distance_summary, quarter_positions, save_path=save_path)
+qb_dashboard(game_data_passing, headshot, "LA", summary_df, pass_distance_summary, quarter_positions, save_path=save_path)
