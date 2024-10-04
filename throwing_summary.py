@@ -278,7 +278,10 @@ summary_table = {
 # Create the updated summary DataFrame
 summary_df = pd.DataFrame.from_dict(summary_table)
 
-def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, team_abb: str, summary_df: pd.DataFrame, pass_distance_summary: pd.DataFrame, quarter_positions, save_path: str = None):
+def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, summary_df: pd.DataFrame, pass_distance_summary: pd.DataFrame, quarter_positions, save_path: str = None):
+    # Get the player's team abbreviation from the qb_info
+    team_abb = player_info['Team']  # Automatically grabs the team from qb_info
+
     # Create a more compact figure
     fig = plt.figure(figsize=(18, 14))  
 
@@ -326,8 +329,8 @@ def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, team_abb: str
     player_weight = player_info['Weight'] 
 
     # Adjust biographical information display
-    ax_bio.text(0.5, 0.95, player_name, fontsize=22, ha='center', fontweight='bold')  # Dynamically display QB name
-    ax_bio.text(0.5, 0.50, f'{player_info["dexterity"]}HQB, Age: {player_age}, {player_height}/{player_weight} lbs', fontsize=18, ha='center')  # Dynamically display height and weight
+    ax_bio.text(0.5, 0.95, player_name, fontsize=22, ha='center', fontweight='bold')  
+    ax_bio.text(0.5, 0.50, f'{player_info["dexterity"]}HQB, Age: {player_age}, {player_height}/{player_weight} lbs', fontsize=18, ha='center')  
     ax_bio.text(0.5, 0.1, f'2024 Week 4 Throwing Summary vs. Tampa Bay', fontsize=18, ha='center', fontstyle='italic')  # Still manually set game information
     ax_bio.axis('off')
 
@@ -338,10 +341,10 @@ def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, team_abb: str
                                    cellLoc='center',
                                    loc='center',
                                    colColours=['#f2f2f2'] * len(summary_df.columns),
-                                   colWidths=[0.1] * len(summary_df.columns))  # Reduced column width
+                                   colWidths=[0.1] * len(summary_df.columns))  
     table.auto_set_font_size(False)
-    table.set_fontsize(12)  # Set a smaller font size for compactness
-    table.scale(0.8, 1.5)  # Reduced scale for compactness
+    table.set_fontsize(12) 
+    table.scale(0.8, 1.5)
 
     # Rolling Total EPA/Play Plot
     ax_rolling_epa.plot(combined_plays['play_id'], combined_plays['rolling_epa_per_play'], marker='o', linestyle='-', color='green')
@@ -386,7 +389,7 @@ def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, team_abb: str
     ax_passing_chart.set_xlabel('Horizontal Placement', fontsize=12)
     ax_passing_chart.set_ylabel('Depth of Target (yards)', fontsize=12)
 
-    # Set legend as the title, placed on top
+    
     ax_passing_chart.legend(loc='upper center', bbox_to_anchor=(0.5, 1.08), ncol=4, fontsize=10, frameon=False)
 
     # Pass Distance Table
@@ -412,7 +415,5 @@ def qb_dashboard(game_data_passing: pd.DataFrame, headshot: Image, team_abb: str
 
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-
 save_path = 'qb_dashboard.png'
-
-qb_dashboard(game_data_passing, headshot, "ATL", summary_df, pass_distance_summary, quarter_positions, save_path=save_path)
+qb_dashboard(game_data_passing, headshot, summary_df, pass_distance_summary, quarter_positions, save_path=save_path)
