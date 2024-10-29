@@ -1,5 +1,5 @@
 # Load required packages
-install.packages("kableExtra")
+#install.packages("kableExtra")
 
 library(cfbfastR)
 library(dplyr)
@@ -24,7 +24,7 @@ if (is.null(pbp_data) || nrow(pbp_data) == 0) {
 
 # Filter data by play_text containing the player's name
 filtered_df <- pbp_data %>%
-  filter(str_detect(play_text, PLAYER_NAME))
+  filter(play_text, PLAYER_NAME)
 
 # Check the structure of the dataset to see available columns
 str(filtered_df)
